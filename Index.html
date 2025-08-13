@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام أرشفة الكتب الرسمية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+        }
+        
+        .print-only {
+            display: none;
+        }
+        
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            body {
+                background: white !important;
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .hover-scale {
+            transition: transform 0.2s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-lg no-print">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <div class="bg-blue-600 p-3 rounded-lg">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">نظام أرشفة الكتب الرسمية</h1>
+                        <p class="text-gray-600">إدارة الكتب الصادرة والواردة برمجةوتصميم سلام اللامي</p>
+                    </div>
+                </div>
+                <div class="bg-blue-100 px-4 py-2 rounded-lg">
+                    <span class="text-blue-800 font-semibold">إجمالي الكتب: </span>
+                    <span id="totalBooks" class="text-blue-900 font-bold text-lg">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto px-6 py-8">
+        <!-- Add Book Form -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8 no-print hover-scale">
+            <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                <svg class="w-6 h-6 ml-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                إضافة كتاب جديد
+            </h2>
+            
+            <form id="bookForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">رقم الكتاب</label>
+                    <input type="text" id="bookId" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">موضوع الكتاب</label>
+                    <input type="text" id="bookSubject" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">نوع الكتاب</label>
+                    <select id="bookType" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <option value="">اختر النوع</option>
+                        <option value="صادر">صادر</option>
+                        <option value="وارد">وارد</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">الجهة المرسلة/المستقبلة</label>
+                    <input type="text" id="bookEntity" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">تاريخ الكتاب</label>
+                    <input type="date" id="bookDate" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">درجة الأهمية</label>
+                    <select id="bookPriority" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <option value="">اختر الأهمية</option>
+                        <option value="عادي">عادي</option>
+                        <option value="مهم">مهم</option>
+                        <option value="عاجل">عاجل</option>
+                        <option value="سري">سري</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">صورة الكتاب</label>
+                    <input type="file" id="bookImage" accept="image/*" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                    <p class="text-xs text-gray-500 mt-1">اختياري - يمكنك تحميل صورة من الكتاب</p>
+                </div>
+                
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">ملاحظات</label>
+                    <textarea id="bookNotes" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" placeholder="ملاحظات إضافية (اختياري)"></textarea>
+                </div>
+                
+                <div class="flex items-end lg:col-span-3">
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center">
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        إضافة الكتاب
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Search and Controls -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8 no-print">
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="flex-1 max-w-md">
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="البحث برقم الكتاب أو العنوان..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <svg class="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button id="printBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center">
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                        </svg>
+                        طباعة
+                    </button>
+                    
+                    <button id="clearAllBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center">
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        مسح الكل
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        
+        <!-- Print Header (only visible when printing) -->
+        <div class="print-only text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">نظام أرشفة الكتب الرسمية</h1>
+            <p class="text-gray-600 mb-4">قائمة الكتب الصادرة والواردة برمجة وتصميم سلام اللامي</p>
+            <p class="text-sm text-gray-500">تاريخ الطباعة: <span id="printDate"></span></p>
+        </div>
+
+        <!-- Books Table -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">رقم الكتاب</th>
+                            <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الموضوع</th>
+                            <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">النوع</th>
+                            <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الجهة</th>
+                            <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التاريخ</th>
+                            <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الأهمية</th>
+                            <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider no-print">الصورة</th>
+                            <th class="px-6 py-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider no-print">الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="booksTableBody" class="bg-white divide-y divide-gray-200">
+                        <tr id="emptyState">
+                            <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                                <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <p class="text-lg font-medium">لا توجد كتب رسمية مؤرشفة</p>
+                                <p class="text-sm">ابدأ بإضافة أول كتاب رسمي باستخدام النموذج أعلاه</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="fixed top-4 left-4 z-50"></div>
+
+    <script>
+        class BookArchiveSystem {
+            constructor() {
+                this.books = [];
+                this.apiUrl = 'https://api.jsonbin.io/v3/b/689bbfe543b1c97be91ccb74'; // استبدل YOUR_BIN_ID برقم الحاوية الخاص بك
+                this.apiKey = '$2a$10$zS2yxqhiAX0iWp5ETK9FAOrFWMr1upCFU2GhYJKJrLC3nsYcoRSyK'; // استبدل YOUR_API_KEY بمفتاح API الخاص بك
+                this.initializeEventListeners();
+                this.loadBooks();
+            }
+
+            async loadBooks() {
+                try {
+                    // محاولة تحميل البيانات من JSONBin
+                    const response = await fetch(this.apiUrl, {
+                        method: 'GET',
+                        headers: {
+                            'X-Master-Key': this.apiKey,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.books = data.record.books || [];
+                        this.showMessage('تم تحميل البيانات من قاعدة البيانات بنجاح!', 'success');
+                    } else {
+                        throw new Error('فشل في تحميل البيانات');
+                    }
+                } catch (error) {
+                    console.error('خطأ في تحميل البيانات:', error);
+                    // في حالة فشل الاتصال، استخدم التخزين المحلي كبديل
+                    const stored = localStorage.getItem('officialBooks');
+                    this.books = stored ? JSON.parse(stored) : [];
+                    this.showMessage('تم تحميل البيانات من التخزين المحلي (وضع عدم الاتصال)', 'error');
+                }
+                
+                this.renderBooks();
+                this.updateTotalCount();
+            }
+
+            async saveBooks() {
+                try {
+                    // حفظ البيانات في JSONBin
+                    const response = await fetch(this.apiUrl, {
+                        method: 'PUT',
+                        headers: {
+                            'X-Master-Key': this.apiKey,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            books: this.books,
+                            lastUpdated: new Date().toISOString()
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        // حفظ نسخة احتياطية محلياً
+                        localStorage.setItem('officialBooks', JSON.stringify(this.books));
+                        return true;
+                    } else {
+                        throw new Error('فشل في حفظ البيانات');
+                    }
+                } catch (error) {
+                    console.error('خطأ في حفظ البيانات:', error);
+                    // في حالة فشل الاتصال، احفظ محلياً فقط
+                    localStorage.setItem('officialBooks', JSON.stringify(this.books));
+                    this.showMessage('تم الحفظ محلياً فقط (لا يوجد اتصال بالإنترنت)', 'error');
+                    return false;
+                }
+            }
+
+            initializeEventListeners() {
+                // Form submission
+                document.getElementById('bookForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addBook();
+                });
+
+                // Search functionality
+                document.getElementById('searchInput').addEventListener('input', (e) => {
+                    this.searchBooks(e.target.value);
+                });
+
+                // Print functionality
+                document.getElementById('printBtn').addEventListener('click', () => {
+                    this.printBooks();
+                });
+
+                // Clear all books
+                document.getElementById('clearAllBtn').addEventListener('click', () => {
+                    this.clearAllBooks();
+                });
+            }
+
+            async addBook() {
+                const imageFile = document.getElementById('bookImage').files[0];
+                let imageData = null;
+                
+                // تحويل الصورة إلى Base64 إذا تم تحميلها
+                if (imageFile) {
+                    imageData = await this.convertImageToBase64(imageFile);
+                }
+                
+                const bookData = {
+                    id: document.getElementById('bookId').value.trim(),
+                    subject: document.getElementById('bookSubject').value.trim(),
+                    type: document.getElementById('bookType').value,
+                    entity: document.getElementById('bookEntity').value.trim(),
+                    date: document.getElementById('bookDate').value,
+                    priority: document.getElementById('bookPriority').value,
+                    notes: document.getElementById('bookNotes').value.trim(),
+                    image: imageData,
+                    dateAdded: new Date().toISOString(),
+                    addedBy: 'المستخدم الحالي' // يمكن تخصيصه حسب نظام المصادقة
+                };
+
+                // Check if book ID already exists
+                if (this.books.some(book => book.id === bookData.id)) {
+                    this.showMessage('رقم الكتاب موجود مسبقاً!', 'error');
+                    return;
+                }
+
+                this.books.push(bookData);
+                const saved = await this.saveBooks();
+                
+                if (saved) {
+                    this.showMessage('تم إضافة الكتاب وحفظه في قاعدة البيانات بنجاح!', 'success');
+                }
+                
+                this.renderBooks();
+                this.updateTotalCount();
+                this.clearForm();
+            }
+
+            async deleteBook(bookId) {
+                if (confirm('هل أنت متأكد من حذف هذا الكتاب؟')) {
+                    this.books = this.books.filter(book => book.id !== bookId);
+                    const saved = await this.saveBooks();
+                    
+                    if (saved) {
+                        this.showMessage('تم حذف الكتاب من قاعدة البيانات بنجاح!', 'success');
+                    }
+                    
+                    this.renderBooks();
+                    this.updateTotalCount();
+                }
+            }
+
+            searchBooks(query) {
+                const filteredBooks = this.books.filter(book => 
+                    book.id.toLowerCase().includes(query.toLowerCase()) ||
+                    book.subject.toLowerCase().includes(query.toLowerCase()) ||
+                    book.entity.toLowerCase().includes(query.toLowerCase())
+                );
+                this.renderBooks(filteredBooks);
+            }
+
+            renderBooks(booksToRender = this.books) {
+                const tbody = document.getElementById('booksTableBody');
+                const emptyState = document.getElementById('emptyState');
+
+                if (booksToRender.length === 0) {
+                    emptyState.style.display = 'table-row';
+                    // Remove existing book rows
+                    const bookRows = tbody.querySelectorAll('tr:not(#emptyState)');
+                    bookRows.forEach(row => row.remove());
+                    return;
+                }
+
+                emptyState.style.display = 'none';
+
+                // Clear existing book rows
+                const bookRows = tbody.querySelectorAll('tr:not(#emptyState)');
+                bookRows.forEach(row => row.remove());
+
+                booksToRender.forEach(book => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-50 fade-in';
+                    
+                    // تحديد لون الأهمية
+                    let priorityColor = 'bg-gray-100 text-gray-800';
+                    if (book.priority === 'مهم') priorityColor = 'bg-yellow-100 text-yellow-800';
+                    else if (book.priority === 'عاجل') priorityColor = 'bg-red-100 text-red-800';
+                    else if (book.priority === 'سري') priorityColor = 'bg-purple-100 text-purple-800';
+                    
+                    // تحديد لون النوع
+                    const typeColor = book.type === 'صادر' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800';
+                    
+                    row.innerHTML = `
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${book.id}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900" style="max-width: 200px; word-wrap: break-word;">${book.subject}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${typeColor}">
+                                ${book.type}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900" style="max-width: 150px; word-wrap: break-word;">${book.entity}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${new Date(book.date).toLocaleDateString('en-GB')}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${priorityColor}">
+                                ${book.priority}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap no-print">
+                            ${book.image ? 
+                                `<img src="${book.image}" alt="صورة الكتاب" class="w-12 h-12 object-cover rounded-lg cursor-pointer hover:scale-110 transition-transform" onclick="bookSystem.viewImage('${book.image}', '${book.subject}')" title="انقر لعرض الصورة">` : 
+                                `<div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>`
+                            }
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium no-print">
+                            <div class="flex space-x-2 space-x-reverse">
+                                <button onclick="bookSystem.viewBookDetails('${book.id}')" class="text-blue-600 hover:text-blue-900 transition-colors duration-200" title="عرض التفاصيل">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                    </svg>
+                                </button>
+                                <button onclick="bookSystem.deleteBook('${book.id}')" class="text-red-600 hover:text-red-900 transition-colors duration-200" title="حذف">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+
+            updateTotalCount() {
+                document.getElementById('totalBooks').textContent = this.books.length;
+            }
+
+            convertImageToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            clearForm() {
+                document.getElementById('bookForm').reset();
+            }
+
+            printBooks() {
+                document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-GB');
+                window.print();
+            }
+
+            async clearAllBooks() {
+                if (confirm('هل أنت متأكد من حذف جميع الكتب؟ هذا الإجراء لا يمكن التراجع عنه.')) {
+                    this.books = [];
+                    const saved = await this.saveBooks();
+                    
+                    if (saved) {
+                        this.showMessage('تم حذف جميع الكتب من قاعدة البيانات!', 'success');
+                    }
+                    
+                    this.renderBooks();
+                    this.updateTotalCount();
+                }
+            }
+
+            viewImage(imageSrc, bookTitle) {
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+                modal.innerHTML = `
+                    <div class="max-w-4xl max-h-full p-4">
+                        <div class="bg-white rounded-xl p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-bold text-gray-800">صورة الكتاب: ${bookTitle}</h3>
+                                <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-gray-500 hover:text-gray-700">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <img src="${imageSrc}" alt="صورة الكتاب" class="max-w-full max-h-96 object-contain mx-auto rounded-lg">
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            viewBookDetails(bookId) {
+                const book = this.books.find(b => b.id === bookId);
+                if (!book) return;
+
+                const modal = document.createElement('div');
+                modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                modal.innerHTML = `
+                    <div class="bg-white rounded-xl p-6 max-w-4xl w-full mx-4 max-h-96 overflow-y-auto">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold text-gray-800">تفاصيل الكتاب</h3>
+                            <button onclick="this.parentElement.parentElement.parentElement.remove()" class="text-gray-500 hover:text-gray-700">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            ${book.image ? `<div class="md:col-span-2 text-center mb-4">
+                                <img src="${book.image}" alt="صورة الكتاب" class="max-w-xs max-h-48 object-contain mx-auto rounded-lg border cursor-pointer" onclick="bookSystem.viewImage('${book.image}', '${book.subject}')" title="انقر لعرض الصورة بحجم أكبر">
+                            </div>` : ''}
+                            <div><strong>رقم الكتاب:</strong> ${book.id}</div>
+                            <div><strong>النوع:</strong> <span class="px-2 py-1 rounded text-sm ${book.type === 'صادر' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}">${book.type}</span></div>
+                            <div class="md:col-span-2"><strong>الموضوع:</strong> ${book.subject}</div>
+                            <div><strong>الجهة:</strong> ${book.entity}</div>
+                            <div><strong>التاريخ:</strong> ${new Date(book.date).toLocaleDateString('en-GB')}</div>
+                            <div><strong>الأهمية:</strong> <span class="px-2 py-1 rounded text-sm ${book.priority === 'عاجل' ? 'bg-red-100 text-red-800' : book.priority === 'مهم' ? 'bg-yellow-100 text-yellow-800' : book.priority === 'سري' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}">${book.priority}</span></div>
+                            <div><strong>تاريخ الإضافة:</strong> ${new Date(book.dateAdded).toLocaleDateString('en-GB')}</div>
+                            ${book.notes ? `<div class="md:col-span-2"><strong>الملاحظات:</strong> ${book.notes}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+            }
+
+            showMessage(message, type) {
+                const container = document.getElementById('messageContainer');
+                const messageDiv = document.createElement('div');
+                
+                const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+                
+                messageDiv.className = `${bgColor} text-white px-6 py-3 rounded-lg shadow-lg mb-4 fade-in`;
+                messageDiv.textContent = message;
+                
+                container.appendChild(messageDiv);
+                
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 3000);
+            }
+        }
+
+        // Initialize the system
+        const bookSystem = new BookArchiveSystem();
+        
+        // Function to copy JSON code to clipboard
+        function copyToClipboard(button) {
+            const jsonCode = document.getElementById('jsonCode').textContent;
+            navigator.clipboard.writeText(jsonCode).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'تم النسخ!';
+                button.className = 'bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.className = 'bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs';
+                }, 2000);
+            }).catch(() => {
+                alert('فشل في نسخ الكود. يرجى نسخه يدوياً.');
+            });
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'96e3653f50b72e41',t:'MTc1NTAzNzU5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
